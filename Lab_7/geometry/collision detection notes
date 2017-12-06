@@ -1,0 +1,17 @@
+Trying to implement collision detection with objects in city
+
+Idea: Use the SAT (Separating Axis Theorem)
+SAT states that that two shapes are not intersecting if and only if there exists at 
+least one axis where the orthogonal projections of the shapes on this axis do not intersect.
+Im taking orthogonal projections to mean the mina dn max points of a shape on a certian
+axis bc i just don't have the time to do anythign fancy
+
+how to implement? Have to get max and min points for x, y, and z, axis for all objects
+do it for each shape? have another array in code for axis min+maxes
+can we be sure that they change when the shapes are transformed? 
+- maybe bound it to an analysis of the points individually rather than a number
+- it does mean that there is a set of 6 points for each individual object to keep 
+track of , but at least it's not all vertexes 
+- problem, the fractal has a huge bounding box and wouldn't allow the camera anywhere 
+near it in that case (have to use the vertexes and surfaces?)
+

@@ -51,10 +51,7 @@ function Cone(num_sides, height){ //num division determines resolution and numbe
         var p1 = top_vertex;
         var p2 = outside_vertices[i];
         var p3 = outside_vertices[(i+1) % num_sides];
-        
-        //var tex1 = p1;
-        //var tex2 = p2;
-        //var tex3 = p3;
+
         
         tex1 = vec2(0.5,0.5);
         tex2 = vec2((Math.cos(percentage))/2+.5, (Math.sin(percentage))/2+.5);
@@ -64,10 +61,7 @@ function Cone(num_sides, height){ //num division determines resolution and numbe
         var p4 = bottom_center_vertex;
         var p5 = bottom_vertices[i];
         var p6 = bottom_vertices[(i+1) % num_sides];
-        
-        //var tex4 = p4;
-        //var tex5 = p5;
-        //var tex6 = p6;
+
 
         tex4 = vec2(0.5,0.5);
         tex5 = vec2((Math.cos(percentage))/2+.5, (Math.sin(percentage))/2+.5);

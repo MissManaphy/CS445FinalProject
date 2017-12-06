@@ -20,11 +20,13 @@
             varying  vec3 fL;
             varying vec4 color;
             varying vec2 texture;
+            varying float yval;
 
             void main()
             {
                 color = vColor;
                 texture = vTexture;
+                yval = vPosition.y;
                 fN = normalize( uModel_view*vNormal ).xyz;
                 fE = -(uModel_view*vPosition).xyz;
                 fL = uLight_position.xyz - (uModel_view * vPosition).xyz;
@@ -43,6 +45,7 @@
             varying vec3 fE;
             varying vec2 texture;
             varying vec4 color;
+            varying float yval;
 
             // incoming uniform values
             uniform int uColorMode;
@@ -51,12 +54,37 @@
             uniform vec4  uAmbient_product, uDiffuse_product, uSpecular_product;
             uniform float uShininess;
             uniform sampler2D uTexture;
+            
+           
+            vec4 colors[7];
+            float heights[7];
 
 
             void main()
             {
                 vec4 myColor; 
+                // Normalize the input lighting vectors
+                vec3 N = normalize(fN);
+                vec3 E = normalize(fE);
+                vec3 L = normalize(fL);
+                vec3 H = normalize( L + E );
                 
+                colors[0] = vec4(0.957, 0.961, 0.969, 1.0); //white-grey 
+                heights[0] = 1.0;
+                colors[1] = vec4(0.768, 0.725, 0.674, 1.0); //grey-brown
+                heights[1] = .4;
+                colors[2] = vec4(0.388, 0.659, 0.388, 1.0); //dark green
+                heights[2] = 0.25;
+                colors[3] = vec4(0.509, 0.878, 0.509, 1.0); //light green
+                heights[3] = 0.135;
+                colors[4] = vec4(0.486, 0.463, 0.357, 1.0); //brown
+                heights[4] = 0.075;
+                colors[5] = vec4(0.878, 0.851, 0.729, 1.0); //tan
+                heights[5] = 0.01;
+                colors[6] = vec4(0.113, 0.294, 0.757, 1.0);//blue
+                heights[6] = 0.0;
+                
+
                 //code to set which texture the object is rendered with
                 if(uColorMode == 0)
                 {myColor = texture2D(uTexture, texture);} //sets to activated texture
@@ -64,15 +92,21 @@
                 {myColor = uColor;} 
                 else if (uColorMode == 2)
                 {myColor = color;} 
+                else if (uColorMode == 3)
+                {for (int i=0; i < 6; i++){
+                    if (yval == 0.0)
+                        {
+                            myColor = vec4(0.113, 0.294, 0.757, 1.0);//blue
+                        }
+                    else if ((yval <= heights[i]) && (yval >= heights[i+1]))
+                        {
+                            myColor = mix(colors[i+1], colors[i], smoothstep(heights[i+1],heights[i],yval));
+                        }
+                }} 
                 else 
                 {myColor = vec4(0, .5, .5, 1.0);} // peacock blue if an incorrect value is specified
             
-                // Normalize the input lighting vectors
-                vec3 N = normalize(fN);
-                vec3 E = normalize(fE);
-                vec3 L = normalize(fL);
 
-                vec3 H = normalize( L + E );
 
                 vec4 ambient = uAmbient_product*myColor;
 
@@ -100,16 +134,28 @@
         <script type="text/javascript" src="geometry/Cone.js"></script>
         <script type="text/javascript" src="geometry/Cylinder.js"></script>
         <script type="text/javascript" src="geometry/Unicycle.js"></script>
+        <script type="text/javascript" src="geometry/Cube.js"></script>
+        <script type="text/javascript" src="geometry/Axis.js"></script>
+        <script type="text/javascript" src="geometry/Water.js"></script>
+        <script type="text/javascript" src="geometry/Sphere.js"></script>
+        <script type="text/javascript" src="geometry/TriPrism.js"></script>
+
         <script type="text/javascript" src="../Common/webgl-utils.js"></script>
         <script type="text/javascript" src="../Common/initShaders.js"></script>
         <script type="text/javascript" src="eventHandlers.js"></script> 
         <script type="text/javascript" src="../Common/MV.js"></script>
         <script type="text/javascript" src="../Common/MatrixStack.js"></script>
-        <script type="text/javascript" src="geometry/Cube.js"></script>
-        <script type="text/javascript" src="geometry/Axis.js"></script>
+        
+        <script type="text/javascript" src="geometry/typedarray.js"></script>
+        <script type="text/javascript" src="geometry/simplex-noise.js"></script>
+        <script type="text/javascript" src="geometry/FractalDEM.js"></script>
+        <script type="text/javascript" src="geometry/IslandGenerator.js"></script>
+        <script type="text/javascript" src="geometry/Fractal.js"></script>
+        <script type="text/javascript" src="geometry/fractal_1.js"></script>
         <script type="text/javascript" src="geometry/Shapes.js"></script>
         <script type="text/javascript" src="Camera.js"></script>
         <script type="text/javascript" src="Lighting.js"></script>
+
         <script type="text/javascript" src="../Common/Textures/Checkerboard.js"></script>
         <script type="text/javascript" src="../Common/Textures/Static.js"></script>
         <script type="text/javascript" src="../Common/Textures/ImageTexture.js"></script>
@@ -119,11 +165,11 @@
     </head>
     <body>
 
-        <h2> Lab 7: Textures</h2>
+        <h2> Lab 8: Final Project</h2>
         <table>
             <tr>
                 <td>
-                    <canvas id="gl-canvas" width="512" height="512" oncontextmenu="return false;">   
+                    <canvas id="gl-canvas" width="1024" height="512" oncontextmenu="return false;">   
                         Oops ... your browser doesn't support the HTML5 canvas element
                     </canvas>
 

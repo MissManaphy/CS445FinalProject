@@ -16,6 +16,7 @@ var mouseState = {
     actionChoice: {TUMBLE: 0, // left mouse button
         DOLLY: 1, // middle mouse button
         TRACK: 2, // right mouse button
+        //TELEPORT: 3, // t + left mouse button
         NONE: 3
     },
     
@@ -112,6 +113,7 @@ function setKeyEventHandler() {
         render();
     };
 }
+
 function rotY() {
     slider = document.getElementById("slider");
     slider.addEventListener("input", function (e) {

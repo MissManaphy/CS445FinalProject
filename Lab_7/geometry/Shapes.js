@@ -11,16 +11,22 @@ var Shapes = {};   // set up Shapes namespace
 Shapes.cube = new Cube();  // global
 Shapes.disk = new Disk(36);
 Shapes.cone = new Cone(36, 1);
-Shapes.cylinder = new Cylinder(48, 2);
-Shapes.unicycle = new Unicycle();
-//Shapes.axis = new Axis();
+Shapes.cylinder = new Cylinder(48, 0.5);
+Shapes.axis = new Axis();
+//Shapes.fractal = new Fractal(8);
+Shapes.fractal = new fractal(30,30);
+Shapes.water = new Water(200);
+Shapes.sphere = new Sphere(400);
 
 Shapes.initShapes = function () {
     Shapes.initBuffers(Shapes.cube);
     Shapes.initBuffers(Shapes.disk);
     Shapes.initBuffers(Shapes.cone);
     Shapes.initBuffers(Shapes.cylinder);
-    //Shapes.axis.initBuffer();
+    Shapes.axis.initBuffer();
+    Shapes.initBuffers(Shapes.fractal);
+    Shapes.initBuffers(Shapes.water);
+    Shapes.initBuffers(Shapes.sphere);
 };
 
 
@@ -95,19 +101,20 @@ if(primitive.colors){
     
 Shapes.drawPrimitive = function (primitive, optional_arguments, include_wires) {
 	
-	// Ruvim: I added an optional_arguments argument to accept the transformation matrix and/or color to use: 
-	if (typeof (optional_arguments) == "object") { 
-		if (optional_arguments.transform) 
-			gl.uniformMatrix4fv (uModel_view, false, flatten (optional_arguments.transform)); 
-		if (optional_arguments.color) 
-			gl.uniform4fv(uColor, optional_arguments.color); 
-	} 
+	// Ruvim: I added an optional_arguments argument to accept the transformation matrix and/or color to use:
+        console.log(primitive.name);
+	//if (typeof (optional_arguments) == "object") { 
+	//	if (optional_arguments.transform) 
+	//		gl.uniformMatrix4fv (uModel_view, false, flatten (optional_arguments.transform)); 
+	//	if (optional_arguments.color) 
+	//		gl.uniform4fv(uColor, optional_arguments.color); 
+	//} 
 	
     gl.bindBuffer(gl.ARRAY_BUFFER, primitive.vertexBuffer);
     gl.enableVertexAttribArray(vPosition);
     gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, primitive.colorBuffer); //uncomment later
+    gl.bindBuffer(gl.ARRAY_BUFFER, primitive.colorBuffer); 
     gl.enableVertexAttribArray(vColor);
     gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
     
@@ -121,33 +128,5 @@ Shapes.drawPrimitive = function (primitive, optional_arguments, include_wires) {
 
     gl.drawArrays(gl.TRIANGLES, 0, primitive.numVertices);
 
-	// Ruvim: And the include_wires boolean argument, which tells whether to draw the wireframes or not: 
-	//if (include_wires !== false && typeof (primitive.edgeBuffer) != "undefined") { 
-	//	gl.disableVertexAttribArray(vPosition);
-	//	gl.disableVertexAttribArray(vColor); //uncomment later
-	//	gl.bindBuffer(gl.ARRAY_BUFFER, null);
-		
-//		Shapes.drawWiredPrimitive(primitive); //add black outlines
-	//} 
 };
-
-//Shapes.drawWiredPrimitive = function (primitive) {
-//
-//    gl.uniform4fv(uColor, vec4(0.0, 0.0, 0.0, 1.0)); 
-//    gl.bindBuffer(gl.ARRAY_BUFFER, primitive.edgeBuffer);
-//    gl.enableVertexAttribArray(vPosition);
-//    gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
-//
-//    gl.bindBuffer(gl.ARRAY_BUFFER, primitive.edgeColorBuffer);
-//    gl.enableVertexAttribArray(vColor);
-//    gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
-//
-//    gl.drawArrays(gl.LINES, 0, primitive.numEdgeVertices);
-//
-//    gl.disableVertexAttribArray(vPosition);
-//    gl.disableVertexAttribArray(vColor);
-//    gl.bindBuffer(gl.ARRAY_BUFFER, null);
-//}
-
-
 

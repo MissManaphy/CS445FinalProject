@@ -26,7 +26,6 @@ function Water(size) {
 
 Water.prototype.initWater = function (size) {
     
-    console.log("Water heights:");
 
     for (var i = 0; i < size; i++) {
         var row = []; 
@@ -44,7 +43,6 @@ Water.prototype.initWater = function (size) {
         this.waterscape.push(row);
     }
     
-    console.log(this.waterscape);
     
 };
 
@@ -68,9 +66,9 @@ Water.prototype.calcNormal = function (i,j) {
 };
 
 Water.prototype.wave = function (i,j) {
-    this.waterscape[i][j][0] = this.waterscape[i][j][0] + this.waterscape[i][j][1];
+    this.waterscape[i][j][0] = (this.waterscape[i][j][0] + this.waterscape[i][j][1])*.1;
     if (this.waterscape[i][j][0] === 0 || this.waterscape[i][j][0] === 1) {
-        this.waterscape[i][j][1] = -this.waterscape[i][j][1];
+        this.waterscape[i][j][1] = -this.waterscape[i][j][1]*.1;
     }
 };
 
@@ -80,7 +78,6 @@ Water.prototype.motion = function () {
             this.wave(i,j);
         }
     }
-    console.log(this.waterscape);
 };
 
 Water.prototype.makeTriangles = function () {

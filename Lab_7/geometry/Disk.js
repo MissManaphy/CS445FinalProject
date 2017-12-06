@@ -28,7 +28,6 @@ function Disk(num_divisions){ //num division determines resolution and number of
         var newpoint = vec4(Math.cos(percentage), 0, Math.sin(percentage));
         outside_vertices[i] = newpoint;
     }
-    console.log(outside_vertices);
 
     var color = vec4(0.0, 0.0, 1.0, 1.0); // blue
     
@@ -49,9 +48,6 @@ function Disk(num_divisions){ //num division determines resolution and number of
         tex1 = vec2(0.5,0.5);
         tex2 = vec2((Math.cos(percentage))/2+.5, (Math.sin(percentage))/2+.5);
         tex3 = vec2((Math.cos(percentage2))/2+.5, (Math.sin(percentage2))/2+.5);
-        
-        console.log("tex2: " +tex2);
-        console.log("tex3: " + tex3);
 
         this.vertices.push(p1, p2, p3);
         this.normals.push(norm, norm, norm);

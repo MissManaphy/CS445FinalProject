@@ -5,9 +5,6 @@ function Unicycle(){
     this.wheelThick = 0.5; //wheel thickness
     this.seatWidth = 3; //seat width
     this.rodDepth = 1;
-    this.topColor = vec4(1.0, 0.0, 0.0, 1.0); //red
-    this.wheelColor = vec4(0.0, 1.0, 0.0, 1.0); //green
-    this.pedalColor = vec4(0.0, 0.0, 1.0, 1.0); //blue
 //    this.thetaX = 0;
 }
 

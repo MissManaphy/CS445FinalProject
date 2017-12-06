@@ -1,3 +1,8 @@
+
+////////////////// VERSION FOR FINAL PROJET BELOW ///////////////////
+
+
+
 /**
  * Contains all of the parameters needed for controlling the camera.
  * @return {Camera}
@@ -9,7 +14,7 @@ function Camera() {
     this.zFar = 500;         // camera's near plane
 
 // Camera *initial* location and orientation parameters
-    this.eye_start = vec4([0, 4, 25, 1]); // initial camera location (needed for reseting)   
+    this.eye_start = vec4([0, -(frac.getH(0,0)*scaleYG+.5), 0, 1]); // initial camera location (needed for reseting)   
     this.VPN = vec4([0, 0, 1, 0]);  // used to initialize uvn
     this.VUP = vec4([0, 1, 0, 0]);  // used to initialize uvn  
 
@@ -72,7 +77,7 @@ Camera.prototype.calcViewMat = function () {
  * @return the projection matrix
  */
 Camera.prototype.calcProjectionMat = function () {
-    aspect = canvas.width / canvas.height;
+    aspect = .5*canvas.width / canvas.height;
     return perspective(this.fov, aspect, this.zNear, this.zFar);
 };
 
@@ -87,38 +92,46 @@ Camera.prototype.motion = function () {
         case mouseState.actionChoice.TUMBLE:  // left mouse button
             // amount of rotation around axes 
             var dy = -0.05 * mouseState.delx;  // angle around y due to mouse drag along x
-            var dx = -0.05 * mouseState.dely;  // angle around x due to mouse drag along y
+            //var dx = -0.05 * mouseState.dely;  // angle around x due to mouse drag along y
+            var dx = 0;
+            
 
             var ry = rotateY(10 * dy);  // rotation matrix around y //10 is the rotation increment
             var rx = rotateX(10 * dx);  // rotation matrix around x
 
-//          TO DO: NEED TO IMPLEMENT TUMBLE FUNCTION
             this.tumble(rx, ry);   //  <----  NEED TO IMPLEMENT THIS FUNCTION BELOW!!!
             
             mouseState.startx = mouseState.x;
             mouseState.starty = mouseState.y;
             break;
+            
         case mouseState.actionChoice.TRACK:  // PAN   - right mouse button
-            var dx = -0.05 * mouseState.delx; // amount to pan along x
-            var dy = 0.05 * mouseState.dely;  // amount to pan along y
-            //  TO DO: NEED TO IMPLEMENT HERE
-//              Calculate this.eye 
+            //var dx = -0.05 * mouseState.delx; // amount to pan along x
+            //var dy = 0.05 * mouseState.dely;  // amount to pan along y
+            
+            var dy = 0;
+            var dx = 0;
+            
               var an = add(scale(dx, this.viewRotation[0]),
               scale(dy, this.viewRotation[1])); //alpha * n
             this.eye = add(this.eye, an); //order matters with subtract
             mouseState.startx = mouseState.x;
             mouseState.starty = mouseState.y;
             break;
+            
         case mouseState.actionChoice.DOLLY:   // middle mouse button
             var dx = 0.05 * mouseState.delx;  // amount to move backward/forward
             var dy = 0.05 * mouseState.dely;
-            //   TO DO: NEED TO IMPLEMENT HERE
-            //  Calculate this.eye 
+
             var an = scale(dy, this.viewRotation[2]); //alpha * n
             this.eye = subtract(this.eye, an); //order matters with subtract
             mouseState.startx = mouseState.x;
             mouseState.starty = mouseState.y;
             break;
+            
+        //case mouseState.actionChoice.TELEPORT: // t+ any click on the right hand side of the screen
+        
+            
         default:
             console.log("unknown action: " + mouseState.action);
     }
@@ -159,7 +172,7 @@ Camera.prototype.tumble = function (rx, ry) {
 	// DO THIS CONTROL LAST - IT IS THE MOST DIFFICULT PART
 	var view_old = this.calcViewMat ();  // current view matrix
 	
-	var pc = vec4 (0,0,0,1); //origin, point about which to rotate 
+	var pc = this.eye; //vec4 (0,0,0,1); //origin, point about which to rotate 
 	var pcPrime = mult (view_old, pc); 
 	
 	
@@ -191,49 +204,44 @@ Camera.prototype.keyAction = function (key) {
     var alpha = 10.0;  // used to control the amount of a turn during the flythrough 
     var s = 1;
     switch (key) {     // different keys should be used because these do thing sin browser
-        case 'W':  // turn right - this is implemented
+        case 'A':  // turn right - this is implemented
             console.log("turn right");
             this.viewRotation = mult(rotateY(alpha), this.viewRotation);
             break;
-        case 'E':   // turn left
+        case 'D':   // turn left
             console.log("turn left");
-            // IMPLEMENT
+
             this.viewRotation = mult(rotateY(-alpha), this.viewRotation);
             break;
-        case 'S':  // turn up   
-            console.log(" turn up");
-            // IMPLEMENT
-            this.viewRotation = mult(rotateX(alpha), this.viewRotation);
-            break;
-        case 'D':  // turn down
-            console.log("turn down");
-            // IMPLEMENT
-            this.viewRotation = mult(rotateX(-alpha), this.viewRotation);
-            break;
-        case 'X':  // bank right
-            console.log("bank right");
-            // IMPLEMENT
-            this.viewRotation = mult(rotateZ(alpha), this.viewRotation);
-            break;
-        case 'C':  // bank left
-            console.log("bank left");
-            // IMPLEMENT
-            this.viewRotation = mult(rotateZ(-alpha), this.viewRotation);
-            break;
-        case 'Q':  // move forward
+        case 'W':  // move forward
             console.log("move forward");
-            // IMPLEMENT
-//            this.viewRotation = scale(s, this.viewRotation[2]);
-            var an = scale(s, this.viewRotation[2]); //alpha * n
-            this.eye = subtract(this.eye, an); //order matters with subtract
-            thetaX -= 5; //pedal rotation
+            
+            // setting regular location 
+            this.eye = add(this.eye,scale(0.05,this.viewRotation[2]));
+
+            // find associated height
+            var tempI = Math.round(-this.eye[0]/scaleXG);
+            var tempJ = Math.round(-this.eye[2]/scaleZG);
+            
+            // if on the fractal map, reset the y coordinate to scaled height
+            if ((-this.eye[0] > 0 && -this.eye[0] < totalX) && (-this.eye[2] > 0 && -this.eye[2] < totalZ)) {
+                this.eye[1] = -(frac.getH(tempI,tempJ)*scaleYG+.5);
+            }
             break;
-        case 'A':  //  move backward
+        case 'S':  //  move backward
             console.log("move backward");
-            // IMPLEMENT
-            var an = scale(s, this.viewRotation[2]); //alpha * n
-            thetaX += 5;
-            this.eye = add(an, this.eye);
+            
+            // setting regular location 
+            this.eye = add(this.eye,scale(-0.05,this.viewRotation[2]));
+
+            // find associated height
+            var tempI = Math.round(-this.eye[0]/scaleXG);
+            var tempJ = Math.round(-this.eye[2]/scaleZG);
+            
+            // if on the fractal map, reset the y coordinate to scaled height
+            if ((-this.eye[0] > 0 && -this.eye[0] < totalX) && (-this.eye[2] > 0 && -this.eye[2] < totalZ)) {
+                this.eye[1] = -(frac.getH(tempI,tempJ)*scaleYG+.5);
+            }
             break;
         case 'R':  //  reset
             console.log("reset");

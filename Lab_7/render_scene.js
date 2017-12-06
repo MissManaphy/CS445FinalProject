@@ -10,19 +10,31 @@ var vTexture;     //the thing for the texture coordinates
 var uTexture;
 
 var thetaX = 0;
-//var lightAngle = document.getElementById("slider").value; //takes an input from slider to calculate x,z 
-//console.log(lightAngle);
+
 
 var camera = new Camera(); 
 var stack = new MatrixStack();
 var light1 = new Lighting();
 var program;
 
+
+//textures
 var checkerboard;
 var target;
 var noManPardon;
 var mission;
 var static; 
+var clouds;
+
+//variables for navigation
+var frac;
+var scaleXG;
+var scaleYG;
+var scaleZG;
+var totalX;
+var totalZ;
+
+
 
 window.onload = function init()
 {   
@@ -56,6 +68,7 @@ window.onload = function init()
     target = new ImageTexture("../Common/textures/test.jpg");
     noManPardon = new ImageTexture("../Common/textures/noManPardon.png");
     mission = new ImageTexture("../Common/textures/MissionStatus.png");
+    clouds = new ImageTexture("../Common/textures/clouds.jpg");
     static = new Static();
     
     
@@ -81,7 +94,7 @@ function shaderSetup() {
     vPosition = gl.getAttribLocation(program, "vPosition");
     vColor = gl.getAttribLocation(program, "vColor"); 
     vTexture = gl.getAttribLocation(program, "vTexture");
-                            // colors but we keep it in for possible use later.
+    // colors but we keep it in for possible use later.
     vNormal = gl.getAttribLocation(program, "vNormal");
    
     // get handles for shader uniform variables: 
@@ -95,11 +108,26 @@ function shaderSetup() {
 function render()
 {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
+    
+    // Left perspective window render
     var projMat = camera.calcProjectionMat();   // Projection matrix  
     gl.uniformMatrix4fv(uProjection, false, flatten(projMat));
-    
     var viewMat = camera.calcViewMat();   // View matrix
+    gl.viewport(0,0,canvas.width/2, canvas.height); //viewport of this camera
+    
+    render1(viewMat); //rendering this with perspective view
+    
+    //Right perspective window render
+    projMat = ortho(-20,20,-20,20,1,2000);
+    gl.uniformMatrix4fv(uProjection, false, flatten(projMat));
+    viewMat = lookAt(vec3(0, 15, 0), vec3(0,0,0), vec3(1,0,0));   // View matrix
+    gl.viewport(canvas.width/2,0,canvas.width/2, canvas.height); //viewport of this camera
+    
+    render1(viewMat);// rendering this with orthographic view
+}
+
+function render1(viewMat)
+{
     var lightshade = mult(viewMat, light1.light_position ); //is a vector
     gl.uniform4fv(uLight_position, lightshade); // camera coordinate system
     
@@ -111,94 +139,7 @@ function render()
     // REMOVE once camera controls are working
     // stack.multiply(translate(0, 0, -10)); 
     // gl.uniformMatrix4fv(uModel_view, false, flatten(stack.top()));
-   
-    //stack.push();
-    
-   ////// creating cube
-    stack.push();  
-    stack.multiply(translate(0, 1, 0));
-    stack.multiply(scalem(3, 3, 3));
-    gl.uniformMatrix4fv(uModel_view, false, flatten(stack.top()));
-    static.activate();
-    gl.uniform1i(gl.getUniformLocation(program, "uColorMode"), 0);
-    //gl.uniform4fv(uColor, vec4(.5, .5, 1.0, 1.0));
-    Shapes.drawPrimitive(Shapes.cube);
-    
-    stack.pop();
-    /////end cube
-    
-    ////// creating disk
-    stack.push();  
-    stack.multiply(translate(-5, 1, 0));
-    stack.multiply(scalem(3, 3, 3));
-    gl.uniformMatrix4fv(uModel_view, false, flatten(stack.top()));
-    noManPardon.activate();
-    gl.uniform1i(gl.getUniformLocation(program, "uColorMode"), 0);
-    //gl.uniform4fv(uColor, vec4(.5, .5, 1.0, 1.0));
-    Shapes.drawPrimitive(Shapes.disk);
-    
-    stack.pop();
-    ////end disk
-    
-    ////// creating cone
-    stack.push();  
-    stack.multiply(translate(5, 1, 0));
-    stack.multiply(scalem(3, 3, 3));
-    gl.uniformMatrix4fv(uModel_view, false, flatten(stack.top()));
-    mission.activate();
-    gl.uniform1i(gl.getUniformLocation(program, "uColorMode"), 2);
-    //gl.uniform4fv(uColor, vec4(.5, .5, 1.0, 1.0));
-    Shapes.drawPrimitive(Shapes.cone);
-    
-    stack.pop();
-    ////end cone
-    
-    /////////
-    stack.push();  
-    stack.multiply(translate(0, 0, -7));
-    stack.multiply(scalem(.5, .5, .5)); 
-    gl.uniform1i(gl.getUniformLocation(program, "uColorMode"), 0);
-    static.activate();
-    myScene();
-    stack.pop();
-    /////////
-    stack.push();  
-    stack.multiply(translate(-5, 0, -7));
-    stack.multiply(scalem(.5, .5, .5));
-    gl.uniform1i(gl.getUniformLocation(program, "uColorMode"), 0);
-    noManPardon.activate();
-    myScene();
-    stack.pop();
-    /////////
-    stack.push();  
-    stack.multiply(translate(5, 0, -7));
-    stack.multiply(scalem(.5, .5, .5));
-    gl.uniform1i(gl.getUniformLocation(program, "uColorMode"), 2);
-    mission.activate();
-    myScene();
-    stack.pop();
-    /////////
-    stack.push();  
-    stack.multiply(translate(10, 0, -7));
-    stack.multiply(scalem(.5, .5, .5));
-    gl.uniform1i(gl.getUniformLocation(program, "uColorMode"), 1);
-    target.activate();
-    myScene();
-    stack.pop();
-    /////////
-    
-    ////// creating cylinder
-    stack.push();  
-    stack.multiply(translate(10, 1, 0));
-    gl.uniformMatrix4fv(uModel_view, false, flatten(stack.top()));
-    target.activate();
-    gl.uniform1i(gl.getUniformLocation(program, "uColorMode"), 3);
-    //gl.uniform4fv(uColor, vec4(.5, .5, 1.0, 1.0));
-    Shapes.drawPrimitive(Shapes.cylinder);
-    
-    stack.pop();
-    ////end cylinder
-    
+  
     
     // light cube
     stack.push();
@@ -209,25 +150,46 @@ function render()
     
     gl.uniformMatrix4fv(uModel_view, false, flatten(viewMat)); // set view transform
     gl.uniform4fv(uColor, vec4(0.0, 0.0, 0.0, 1.0));  // set color to green
+    gl.uniform1i(gl.getUniformLocation(program, "uColorMode"), 4);
     Shapes.drawPrimitive(Shapes.cube);  // draw cube
+   
     
-    //ground
-    stack.multiply(translate(0, -1, 0));
-    stack.multiply(scalem(50, 1, 50));
+    //fractal landscape
+    //stack.multiply(translate(-15, 0, -15));
+    //stack.multiply(scalem(10, 10, 10));
     gl.uniformMatrix4fv(uModel_view, false, flatten(stack.top()));
     gl.uniform4fv(uColor, vec4(0.0, 1.0, 1.0, 1.0)); 
-    checkerboard.activate();
+    gl.uniform1i(gl.getUniformLocation(program, "uColorMode"), 3);
+    Shapes.drawPrimitive(Shapes.fractal);
+    
+    stack.pop();
+    
+    
+    //water
+    stack.push();
+    stack.multiply(translate(-35, .0001, -35));
+    stack.multiply(scalem(1/3, 1/4, 1/3));
+    gl.uniformMatrix4fv(uModel_view, false, flatten(stack.top()));
+    gl.uniform4fv(uColor, vec4(0.0, 1.0, 1.0, 1.0)); 
+    gl.uniform1i(gl.getUniformLocation(program, "uColorMode"), 2);
+    Shapes.drawPrimitive(Shapes.water);
+    
+    stack.pop();
+    
+    
+    //sky sphere
+    
+    stack.push();  
+    
+    stack.multiply(scalem(30, 30, 30));
+    
+    gl.uniformMatrix4fv(uModel_view, false, flatten(stack.top()));
+    clouds.activate();
     gl.uniform1i(gl.getUniformLocation(program, "uColorMode"), 0);
-    Shapes.drawPrimitive(Shapes.cube);
+    //gl.uniform4fv(uColor, vec4(.5, .5, 1.0, 1.0));
+    Shapes.drawPrimitive(Shapes.sphere);
     
     stack.pop();
    
-}
-
-function myScene(){ //cubes and other primitives on the ground
-    var unicycle1 = new Unicycle();
-    unicycle1.drawUnicycle();
-    
-    
 }
 
